@@ -42,25 +42,69 @@ def find_outliers_IQR(df):
     return df
 
 
+def linear_regression(df):
+    years = df.drop('Transport Demand', axis='columns')
+    transport_demands = df['Transport Demand']
+
+    lr = linear_model.LinearRegression()
+    lr.fit(years, transport_demands)
+    predicted_transport_demands = lr.predict(years)
+
+    # Linear regression line plot
+
+    plt.figure(figsize=(12, 6))
+    plt.scatter(df['Year'], df['Transport Demand'])
+    plt.plot(df['Year'], predicted_transport_demands, 'r')
+    plt.show()
+
+    # original vs predicted plot
+
+    plt.figure(figsize=(12, 6))
+    plt.plot(df['Year'], df['Transport Demand'], label="Original")
+    plt.plot(df['Year'], predicted_transport_demands, label="Predicted")
+    plt.legend()
+    plt.show()
+
+    print("----------------------")
+    print("Forecasted German transport demand in 2050: ", lr.predict([[2050]]))
+
+    forecast_years = [2030, 2040, 2050]
+    new_df = DataFrame(forecast_years, columns=['Forcasted Years'])
+    forecast_transport_demand = lr.predict(new_df)
+    new_df['Forecasted Transport Demand'] = forecast_transport_demand
+
+    # plot the forecast
+    plt.figure(figsize=(12, 6))
+    plt.plot(new_df['Forcasted Years'], new_df['Forecasted Transport Demand'])
+    plt.xlabel('Years')
+    plt.ylabel('Transport Demand')
+    plt.title("Forecasted German Transport Demand")
+    plt.show()
+
+    # export to csv
+    new_df.to_csv("output/Forecasted_Transport_Demand.csv")
+
 
 if __name__ == '__main__':
     df = import_data_from_csv()
     print(df.describe()[['Year','Transport Demand']])
     print("Old Dataframe: ", df.shape)
 
-    plt.figure(figsize=(16, 8))
-    plt.subplot(2, 2, 1)
-    sns.histplot(df['Year'])
-    plt.subplot(2, 2, 2)
-    sns.boxplot(df['Transport Demand'])
+    # plt.figure(figsize=(16, 8))
+    # plt.subplot(2, 2, 1)
+    # sns.histplot(df['Year'])
+    # plt.subplot(2, 2, 2)
+    # sns.boxplot(df['Transport Demand'])
 
     new_df = find_outliers_IQR(df)
 
     print(new_df.describe()[['Year','Transport Demand']])
     print("New Dataframe: ", new_df.shape)
 
-    plt.subplot(2, 2, 3)
-    sns.histplot(new_df['Year'])
-    plt.subplot(2, 2, 4)
-    sns.boxplot(new_df['Transport Demand'])
-    plt.show()
+    # plt.subplot(2, 2, 3)
+    # sns.histplot(new_df['Year'])
+    # plt.subplot(2, 2, 4)
+    # sns.boxplot(new_df['Transport Demand'])
+    # plt.show()
+
+    linear_regression(df)
